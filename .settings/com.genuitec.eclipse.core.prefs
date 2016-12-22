@@ -1,0 +1,3 @@
+eclipse.preferences.version=1
+validator.Checked=src/main/webapp/lib/layerTree,src/main/webapp/lib/jquery.validation,src/main/webapp/lib/lay,src/main/webapp/lib/jstree,src/main/webapp/lib/echarts/echarts.min.js,src/main/webapp/lib/respond.min.js,src/main/webapp/lib/handlebars.js,src/main/webapp/lib/layui.js,src/main/webapp/lib/nprogress
+validator.Unchecked=

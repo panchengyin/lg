@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lg.dao.ISysResourceDao" >
+  <resultMap id="BaseResultMap" type="com.lg.pojo.SysResource" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+    <result column="resource_name" property="resourceName" jdbcType="VARCHAR" />
+    <result column="resource_path" property="resourcePath" jdbcType="VARCHAR" />
+    <result column="resource_icon" property="resourceIcon" jdbcType="VARCHAR" />
+    <result column="level" property="level" jdbcType="INTEGER" />
+    <result column="resource_desc" property="resourceDesc" jdbcType="VARCHAR" />
+    <result column="permission_str" property="permissionStr" jdbcType="VARCHAR" />
+    <result column="order_num" property="orderNum" jdbcType="INTEGER" />
+    <result column="is_enable" property="isEnable" jdbcType="INTEGER" />
+    <result column="create_user_id" property="createUserId" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_user_id" property="modifyUserId" jdbcType="INTEGER" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  
+  <resultMap id="BaseResultMap_VO"  extends="BaseResultMap" type="com.lg.vo.SysResourceVO" >
+  	 <result column="parent_Name" property="parentName" jdbcType="VARCHAR" />
+  	 <result column="role_count" property="roleCount" jdbcType="VARCHAR" />
+  </resultMap> 
+ 
+  <sql id="Base_Column_List_page" >
+    id, parent_id,parent_id as tmpId,(select t.resource_name from t_sys_resource t where t.id=tmpId) as parent_Name, 
+    resource_name, resource_path, resource_icon, level, resource_desc, 
+    permission_str, order_num, is_enable, create_user_id, create_time, modify_user_id, 
+    modify_time
+  </sql>
+
+  <sql id="Base_Column_List" >
+    id, parent_id, resource_name, resource_path, resource_icon, level, resource_desc, 
+    permission_str, order_num, is_enable, create_user_id, create_time, modify_user_id, 
+    modify_time
+  </sql>
+  <!--分页-->
+   <select id="queryListPage" parameterType="java.lang.String" resultMap="BaseResultMap_VO">
+   		<bind name="bing_search" value="'%' + search + '%'" />
+	    SELECT 
+	    <include refid="Base_Column_List_page" />  
+	    FROM t_sys_resource
+	    WHERE 1 = 1
+	    <if test="search != null and search !=''">
+	        AND resource_name like #{bing_search}
+	    </if>
+	   <if test="id != null and id !=''">
+	        AND (parent_id = #{id} or id= #{id} )
+	    </if>
+	    order by parent_id,order_num 
+  </select>
+  <!-- 批量删除 -->
+  <delete id="deleteByIds" parameterType="java.util.List">  
+    delete from t_sys_resource  where id in
+     <foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+     </foreach>
+  </delete>
+  <!-- 获取资源列表-->
+  <select id="selectTreeList" resultMap="BaseResultMap_VO" parameterType="java.lang.String"  >
+   	select parent_id as tmpId,
+   	<if test="roleId !=''" >
+       (select count(*) from t_sys_role_resource where resource_id=t.id and role_id=#{roleId}) role_count,
+    </if>
+   	<if test="roleId ==''" >
+   		0 as role_count,
+   	</if>
+   	t.id,t.parent_id,t.resource_name from t_sys_resource t where t.is_enable='1' order by t.parent_id,t.order_num 
+  </select>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_sys_resource
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_sys_resource
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.lg.pojo.SysResource" >
+    insert into t_sys_resource (id, parent_id, resource_name, 
+      resource_path, resource_icon, level, 
+      resource_desc, permission_str, order_num, 
+      is_enable, create_user_id, create_time, 
+      modify_user_id, modify_time)
+    values (#{id,jdbcType=INTEGER}, #{parentId,jdbcType=INTEGER}, #{resourceName,jdbcType=VARCHAR}, 
+      #{resourcePath,jdbcType=VARCHAR}, #{resourceIcon,jdbcType=VARCHAR}, #{level,jdbcType=INTEGER}, 
+      #{resourceDesc,jdbcType=VARCHAR}, #{permissionStr,jdbcType=VARCHAR}, #{orderNum,jdbcType=INTEGER}, 
+      #{isEnable,jdbcType=INTEGER}, #{createUserId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{modifyUserId,jdbcType=INTEGER}, #{modifyTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.lg.pojo.SysResource" >
+    insert into t_sys_resource
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="parentId != null" >
+        parent_id,
+      </if>
+      <if test="resourceName != null" >
+        resource_name,
+      </if>
+      <if test="resourcePath != null" >
+        resource_path,
+      </if>
+      <if test="resourceIcon != null" >
+        resource_icon,
+      </if>
+      <if test="level != null" >
+        level,
+      </if>
+      <if test="resourceDesc != null" >
+        resource_desc,
+      </if>
+      <if test="permissionStr != null" >
+        permission_str,
+      </if>
+      <if test="orderNum != null" >
+        order_num,
+      </if>
+      <if test="isEnable != null" >
+        is_enable,
+      </if>
+      <if test="createUserId != null" >
+        create_user_id,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modifyUserId != null" >
+        modify_user_id,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="parentId != null" >
+        #{parentId,jdbcType=INTEGER},
+      </if>
+      <if test="resourceName != null" >
+        #{resourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="resourcePath != null" >
+        #{resourcePath,jdbcType=VARCHAR},
+      </if>
+      <if test="resourceIcon != null" >
+        #{resourceIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="level != null" >
+        #{level,jdbcType=INTEGER},
+      </if>
+      <if test="resourceDesc != null" >
+        #{resourceDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="permissionStr != null" >
+        #{permissionStr,jdbcType=VARCHAR},
+      </if>
+      <if test="orderNum != null" >
+        #{orderNum,jdbcType=INTEGER},
+      </if>
+      <if test="isEnable != null" >
+        #{isEnable,jdbcType=INTEGER},
+      </if>
+      <if test="createUserId != null" >
+        #{createUserId,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyUserId != null" >
+        #{modifyUserId,jdbcType=INTEGER},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.lg.pojo.SysResource" >
+    update t_sys_resource
+    <set >
+      <if test="parentId != null" >
+        parent_id = #{parentId,jdbcType=INTEGER},
+      </if>
+      <if test="resourceName != null" >
+        resource_name = #{resourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="resourcePath != null" >
+        resource_path = #{resourcePath,jdbcType=VARCHAR},
+      </if>
+      <if test="resourceIcon != null" >
+        resource_icon = #{resourceIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="level != null" >
+        level = #{level,jdbcType=INTEGER},
+      </if>
+      <if test="resourceDesc != null" >
+        resource_desc = #{resourceDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="permissionStr != null" >
+        permission_str = #{permissionStr,jdbcType=VARCHAR},
+      </if>
+      <if test="orderNum != null" >
+        order_num = #{orderNum,jdbcType=INTEGER},
+      </if>
+      <if test="isEnable != null" >
+        is_enable = #{isEnable,jdbcType=INTEGER},
+      </if>
+      <if test="createUserId != null" >
+        create_user_id = #{createUserId,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyUserId != null" >
+        modify_user_id = #{modifyUserId,jdbcType=INTEGER},
+      </if>
+      <if test="modifyTime != null" >
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.lg.pojo.SysResource" >
+    update t_sys_resource
+    set parent_id = #{parentId,jdbcType=INTEGER},
+      resource_name = #{resourceName,jdbcType=VARCHAR},
+      resource_path = #{resourcePath,jdbcType=VARCHAR},
+      resource_icon = #{resourceIcon,jdbcType=VARCHAR},
+      level = #{level,jdbcType=INTEGER},
+      resource_desc = #{resourceDesc,jdbcType=VARCHAR},
+      permission_str = #{permissionStr,jdbcType=VARCHAR},
+      order_num = #{orderNum,jdbcType=INTEGER},
+      is_enable = #{isEnable,jdbcType=INTEGER},
+      create_user_id = #{createUserId,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      modify_user_id = #{modifyUserId,jdbcType=INTEGER},
+      modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
